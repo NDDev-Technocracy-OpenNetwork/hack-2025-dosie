@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personalities - Детальный просмотр членов жюри</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .header {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .nav-tab {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px 10px 0 0;
+            transition: all 0.3s;
+        }
+
+        .nav-tab:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .nav-tab.active {
+            background: white;
+            color: #1e3c72;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .main-content {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            color: #1e3c72;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .person-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .person-card {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .person-card:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .person-card.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .person-card .name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .person-card .position {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .person-card .company {
+            font-size: 11px;
+            opacity: 0.6;
+        }
+
+        .category-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 12px;
+            font-size: 10px;
+            margin-top: 5px;
+        }
+
+        .person-card.active .category-badge {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .detail-view {
+            flex: 1;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .detail-header {
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .detail-header h1 {
+            color: #1e3c72;
+            margin-bottom: 10px;
+        }
+
+        .detail-header .subtitle {
+            color: #666;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .detail-header .company-info {
+            color: #999;
+            font-size: 16px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .info-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .info-item .label {
+            color: #666;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .info-item .value {
+            color: #333;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h2 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-icon {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+
+        .achievement-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .achievement-item {
+            padding: 15px;
+            background: linear-gradient(to right, #f8f9fa, #fff);
+            border-left: 3px solid #667eea;
+            border-radius: 5px;
+        }
+
+        .career-timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .career-timeline::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e0e0e0;
+        }
+
+        .career-item {
+            position: relative;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .career-item::before {
+            content: '';
+            position: absolute;
+            left: -24px;
+            top: 20px;
+            width: 12px;
+            height: 12px;
+            background: #667eea;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+
+        .career-item.current::before {
+            background: #4CAF50;
+        }
+
+        .career-item .period {
+            color: #999;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .career-item .role {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 3px;
+        }
+
+        .career-item .company-name {
+            color: #666;
+        }
+
+        .skills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .skill-tag {
+            padding: 8px 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .connections-graph {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 400px;
+        }
+
+        #personalGraph {
+            width: 100%;
+            height: 400px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .filter-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 5px 15px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-btn:hover {
+            border-color: #667eea;
+        }
+
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .media-section {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .media-card {
+            flex: 1;
+            min-width: 200px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .media-card .icon {
+            font-size: 30px;
+            margin-bottom: 10px;
+        }
+
+        .media-card .platform {
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .media-card .value {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .view-dossier-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .view-dossier-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            animation: pulse-glow 1.5s infinite;
+        }
+        
+        .btn-icon {
+            display: inline-block;
+            margin-right: 8px;
+            animation: spin 2s linear infinite;
+        }
+        
+        .summary-container {
+            position: relative;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.05) 0%, rgba(102, 126, 234, 0.05) 100%);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        
+        .summary-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #00d4ff, #667eea, #00d4ff);
+            border-radius: 12px;
+            opacity: 0.5;
+            z-index: -1;
+            animation: border-glow 3s linear infinite;
+        }
+        
+        .summary-card {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .summary-card h4 {
+            color: #00d4ff;
+            margin: 15px 0 10px 0;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+            animation: text-glow 2s ease-in-out infinite alternate;
+        }
+        
+        .summary-card p {
+            color: #a8b2d1;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        /* Hi-tech анимации */
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4); }
+            50% { box-shadow: 0 8px 30px rgba(0, 212, 255, 0.6); }
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes border-glow {
+            0% { background: linear-gradient(45deg, #00d4ff, #667eea, #00d4ff); }
+            25% { background: linear-gradient(45deg, #667eea, #00d4ff, #667eea); }
+            50% { background: linear-gradient(45deg, #00d4ff, #667eea, #00d4ff); }
+            75% { background: linear-gradient(45deg, #667eea, #00d4ff, #667eea); }
+            100% { background: linear-gradient(45deg, #00d4ff, #667eea, #00d4ff); }
+        }
+        
+        @keyframes text-glow {
+            from { text-shadow: 0 0 10px rgba(0, 212, 255, 0.5); }
+            to { text-shadow: 0 0 20px rgba(0, 212, 255, 0.8), 0 0 30px rgba(102, 126, 234, 0.4); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        @keyframes matrix-rain {
+            0% { transform: translateY(-100px); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(100vh); opacity: 0; }
+        }
+        
+        /* Анимация карточек персон */
+        .person-card {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .person-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .person-card:hover::before {
+            left: 100%;
+        }
+        
+        .person-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+            border-color: #00d4ff;
+            animation: float 2s ease-in-out infinite;
+        }
+        
+        /* Анимация фильтров */
+        .filter-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .filter-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.3) 0%, transparent 70%);
+            transition: all 0.4s;
+            transform: translate(-50%, -50%);
+        }
+        
+        .filter-btn:hover::after {
+            width: 200px;
+            height: 200px;
+        }
+        
+        .filter-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
+        }
+        
+        /* Матричный дождь эффект для фона */
+        .matrix-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.1;
+        }
+        
+        .matrix-char {
+            position: absolute;
+            color: #00d4ff;
+            font-family: monospace;
+            font-size: 12px;
+            animation: matrix-rain 5s linear infinite;
+        }
+        
+        /* Добавляем сканлайны */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            background: linear-gradient(
+                to bottom,
+                transparent 49%,
+                rgba(0, 212, 255, 0.03) 50%,
+                transparent 51%
+            );
+            background-size: 100% 4px;
+            animation: scanlines 0.1s linear infinite;
+        }
+        
+        @keyframes scanlines {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(4px); }
+        }
+
+        .placeholder {
+            text-align: center;
+            padding: 100px 20px;
+            color: #999;
+        }
+
+        .placeholder h2 {
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                max-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <nav class="nav-tabs">
+            <a href="index.html" class="nav-tab">Простая визуализация</a>
+            <a href="graph.html" class="nav-tab">Граф знаний</a>
+            <a href="personalities.html" class="nav-tab active">Personalities</a>
+        </nav>
+    </div>
+
+    <div class="container">
+        <div class="main-content">
+            <aside class="sidebar">
+                <h2>Члены жюри</h2>
+                <div class="filter-section">
+                    <div class="filter-group" id="categoryFilters"></div>
+                </div>
+                <div class="person-list" id="personList"></div>
+            </aside>
+
+            <main class="detail-view">
+                <div id="detailContent">
+                    <div class="placeholder">
+                        <h2>👈 Выберите члена жюри</h2>
+                        <p>Для просмотра детальной информации и всех связей</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="data/persons.js"></script>
+    <script src="data/companies.js"></script>
+    <script src="data/investors.js"></script>
+    <script src="data/connections.js"></script>
+    <script src="md-content.js"></script>
+    <script src="personalities.js"></script>
+    
+    <script>
+        // Создание матричного дождя
+        function createMatrixRain() {
+            const matrixContainer = document.createElement('div');
+            matrixContainer.className = 'matrix-rain';
+            document.body.appendChild(matrixContainer);
+            
+            function createMatrixChar() {
+                const char = document.createElement('div');
+                char.className = 'matrix-char';
+                char.textContent = Math.random() < 0.5 ? '0' : '1';
+                char.style.left = Math.random() * window.innerWidth + 'px';
+                char.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                char.style.animationDelay = Math.random() * 2 + 's';
+                matrixContainer.appendChild(char);
+                
+                setTimeout(() => {
+                    if (char.parentNode) {
+                        char.parentNode.removeChild(char);
+                    }
+                }, 5000);
+            }
+            
+            // Создаем символы матрицы каждые 200мс
+            setInterval(createMatrixChar, 200);
+        }
+        
+        // Добавляем голографические эффекты
+        function addHolographicEffects() {
+            const cards = document.querySelectorAll('.person-card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.background = 'linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(102, 126, 234, 0.1) 100%)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.background = '';
+                });
+            });
+        }
+        
+        // Создаем частицы в фоне
+        function createParticles() {
+            const particleContainer = document.createElement('div');
+            particleContainer.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+                z-index: -2;
+                overflow: hidden;
+            `;
+            document.body.appendChild(particleContainer);
+            
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.style.cssText = `
+                    position: absolute;
+                    width: 2px;
+                    height: 2px;
+                    background: #00d4ff;
+                    border-radius: 50%;
+                    animation: float ${3 + Math.random() * 4}s ease-in-out infinite;
+                    animation-delay: ${Math.random() * 5}s;
+                    opacity: ${0.3 + Math.random() * 0.4};
+                    left: ${Math.random() * 100}%;
+                    top: ${Math.random() * 100}%;
+                    box-shadow: 0 0 6px #00d4ff;
+                `;
+                particleContainer.appendChild(particle);
+            }
+        }
+        
+        // Добавляем глитч эффект к заголовкам
+        function addGlitchEffect() {
+            const headers = document.querySelectorAll('h1, h2');
+            headers.forEach(header => {
+                header.addEventListener('mouseenter', function() {
+                    this.style.animation = 'none';
+                    this.style.textShadow = '2px 0 #ff0000, -2px 0 #00ffff, 0 2px #ffff00';
+                    setTimeout(() => {
+                        this.style.textShadow = '';
+                        this.style.animation = '';
+                    }, 200);
+                });
+            });
+        }
+        
+        // Создаем светящиеся линии соединения
+        function createConnectingLines() {
+            const container = document.querySelector('.main-content');
+            if (!container) return;
+            
+            const canvas = document.createElement('canvas');
+            canvas.style.cssText = `
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+                z-index: -1;
+                opacity: 0.3;
+            `;
+            container.style.position = 'relative';
+            container.appendChild(canvas);
+            
+            const ctx = canvas.getContext('2d');
+            canvas.width = container.offsetWidth;
+            canvas.height = container.offsetHeight;
+            
+            function drawLines() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.strokeStyle = '#00d4ff';
+                ctx.lineWidth = 1;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#00d4ff';
+                
+                // Рисуем случайные линии
+                for (let i = 0; i < 5; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
+                    ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
+                    ctx.stroke();
+                }
+            }
+            
+            setInterval(drawLines, 2000);
+        }
+        
+        // Добавляем пульсирующие точки
+        function addPulsingDots() {
+            const dots = document.createElement('div');
+            dots.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+                z-index: -1;
+            `;
+            document.body.appendChild(dots);
+            
+            for (let i = 0; i < 20; i++) {
+                const dot = document.createElement('div');
+                dot.style.cssText = `
+                    position: absolute;
+                    width: 4px;
+                    height: 4px;
+                    background: #667eea;
+                    border-radius: 50%;
+                    left: ${Math.random() * 100}%;
+                    top: ${Math.random() * 100}%;
+                    animation: pulse-glow ${2 + Math.random() * 3}s infinite;
+                    animation-delay: ${Math.random() * 2}s;
+                    box-shadow: 0 0 10px #667eea;
+                `;
+                dots.appendChild(dot);
+            }
+        }
+        
+        // Инициализация всех эффектов
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                createMatrixRain();
+                createParticles();
+                addPulsingDots();
+                addGlitchEffect();
+                createConnectingLines();
+            }, 1000);
+            
+            // Добавляем эффекты при загрузке
+            setTimeout(addHolographicEffects, 2000);
+        });
+        
+        // Кибер-курсор
+        document.addEventListener('mousemove', function(e) {
+            // Создаем след за курсором
+            const trail = document.createElement('div');
+            trail.style.cssText = `
+                position: fixed;
+                width: 6px;
+                height: 6px;
+                background: #00d4ff;
+                border-radius: 50%;
+                pointer-events: none;
+                z-index: 9999;
+                left: ${e.clientX - 3}px;
+                top: ${e.clientY - 3}px;
+                animation: fade-out 0.5s ease-out forwards;
+                box-shadow: 0 0 10px #00d4ff;
+            `;
+            document.body.appendChild(trail);
+            
+            setTimeout(() => {
+                if (trail.parentNode) {
+                    trail.parentNode.removeChild(trail);
+                }
+            }, 500);
+        });
+        
+        // Добавляем анимацию исчезновения для следа курсора
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fade-out {
+                from { opacity: 1; transform: scale(1); }
+                to { opacity: 0; transform: scale(0.5); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

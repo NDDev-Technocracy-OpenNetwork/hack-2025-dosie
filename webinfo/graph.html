@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Граф знаний - Векторная визуализация</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #0a0e27;
+            overflow: hidden;
+            color: white;
+        }
+
+        #graph-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #0a0e27 0%, #000 100%);
+        }
+
+        .controls {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.8);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            z-index: 1000;
+            max-width: 300px;
+        }
+
+        .controls h3 {
+            margin-bottom: 15px;
+            color: #4ECDC4;
+            font-size: 16px;
+        }
+
+        .filter-section {
+            margin-bottom: 20px;
+        }
+
+        .filter-section h4 {
+            color: #aaa;
+            font-size: 12px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .checkbox-item:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .checkbox-item input {
+            margin-right: 8px;
+            cursor: pointer;
+        }
+
+        .checkbox-item label {
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .color-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 5px;
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        .search-box::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+
+        .info-panel {
+            position: fixed;
+            right: -400px;
+            top: 0;
+            width: 400px;
+            height: 100vh;
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(255,255,255,0.1);
+            transition: right 0.3s ease;
+            overflow-y: auto;
+            z-index: 1001;
+            padding: 30px;
+        }
+
+        .info-panel.show {
+            right: 0;
+        }
+
+        .info-panel .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 30px;
+            height: 30px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: transparent;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #aaa;
+            transition: all 0.3s;
+        }
+
+        .info-panel .close-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .info-content h2 {
+            color: #4ECDC4;
+            margin-bottom: 10px;
+            padding-right: 40px;
+        }
+
+        .info-content .type-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: rgba(78,205,196,0.2);
+            color: #4ECDC4;
+            border-radius: 20px;
+            font-size: 11px;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+        }
+
+        .info-content .details {
+            color: #ccc;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .info-content .connections {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 20px;
+        }
+
+        .info-content .connections h3 {
+            color: #aaa;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .info-content .connection-item {
+            padding: 8px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 5px;
+            margin-bottom: 5px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .info-content .connection-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .legend {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            z-index: 1000;
+        }
+
+        .legend h4 {
+            color: #4ECDC4;
+            font-size: 12px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+            font-size: 11px;
+            color: #aaa;
+        }
+
+        .stats {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            z-index: 1000;
+        }
+
+        .stats-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+
+        .stats-item span:first-child {
+            color: #aaa;
+        }
+
+        .stats-item span:last-child {
+            color: #4ECDC4;
+            font-weight: bold;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0,0,0,0.9);
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid rgba(255,255,255,0.2);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 12px;
+            z-index: 2000;
+            max-width: 250px;
+        }
+
+        .tooltip.show {
+            opacity: 1;
+        }
+
+        .link-label {
+            font-size: 10px;
+            fill: #666;
+            text-anchor: middle;
+            pointer-events: none;
+        }
+
+        .node {
+            cursor: pointer;
+        }
+
+        .node-label {
+            pointer-events: none;
+            text-anchor: middle;
+            font-size: 11px;
+            fill: white;
+            text-shadow: 0 0 3px rgba(0,0,0,0.8);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+
+        .highlighted {
+            animation: pulse 2s infinite;
+        }
+
+        .zoom-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .zoom-btn {
+            width: 40px;
+            height: 40px;
+            background: rgba(0,0,0,0.8);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.3s;
+        }
+
+        .zoom-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="graph-container">
+        <svg id="graph"></svg>
+    </div>
+
+    <div class="controls">
+        <h3>Фильтры графа</h3>
+        <input type="text" class="search-box" id="searchBox" placeholder="Поиск...">
+        
+        <div class="filter-section">
+            <h4>Типы узлов</h4>
+            <div class="checkbox-group" id="nodeTypeFilters">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="filter-person" checked>
+                    <label for="filter-person">
+                        <span class="color-indicator" style="background: #FF6B6B"></span>
+                        Люди
+                    </label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="filter-company" checked>
+                    <label for="filter-company">
+                        <span class="color-indicator" style="background: #4ECDC4"></span>
+                        Компании
+                    </label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="filter-investor" checked>
+                    <label for="filter-investor">
+                        <span class="color-indicator" style="background: #FFA07A"></span>
+                        Инвесторы
+                    </label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="filter-skill" checked>
+                    <label for="filter-skill">
+                        <span class="color-indicator" style="background: #98D8C8"></span>
+                        Навыки
+                    </label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="filter-project" checked>
+                    <label for="filter-project">
+                        <span class="color-indicator" style="background: #BB8FCE"></span>
+                        Проекты
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="filter-section">
+            <h4>Типы связей</h4>
+            <div class="checkbox-group" id="linkTypeFilters">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="filter-works" checked>
+                    <label for="filter-works">Работа</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="filter-funding" checked>
+                    <label for="filter-funding">Инвестиции</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="filter-skills" checked>
+                    <label for="filter-skills">Навыки</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="filter-collab" checked>
+                    <label for="filter-collab">Сотрудничество</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="stats">
+        <div class="stats-item">
+            <span>Узлов:</span>
+            <span id="nodeCount">0</span>
+        </div>
+        <div class="stats-item">
+            <span>Связей:</span>
+            <span id="linkCount">0</span>
+        </div>
+        <div class="stats-item">
+            <span>Компаний:</span>
+            <span id="companyCount">0</span>
+        </div>
+        <div class="stats-item">
+            <span>Людей:</span>
+            <span id="personCount">0</span>
+        </div>
+    </div>
+
+    <div class="legend">
+        <h4>Легенда</h4>
+        <div class="legend-item">
+            <svg width="20" height="2"><line x1="0" y1="1" x2="20" y2="1" stroke="#4ECDC4" stroke-width="2"/></svg>
+            <span>Работает/работал</span>
+        </div>
+        <div class="legend-item">
+            <svg width="20" height="2"><line x1="0" y1="1" x2="20" y2="1" stroke="#FFA07A" stroke-width="2"/></svg>
+            <span>Инвестиции</span>
+        </div>
+        <div class="legend-item">
+            <svg width="20" height="2"><line x1="0" y1="1" x2="20" y2="1" stroke="#98D8C8" stroke-width="2"/></svg>
+            <span>Навыки</span>
+        </div>
+        <div class="legend-item">
+            <svg width="20" height="2"><line x1="0" y1="1" x2="20" y2="1" stroke="#BB8FCE" stroke-width="2" stroke-dasharray="5,5"/></svg>
+            <span>Сотрудничество</span>
+        </div>
+    </div>
+
+    <div class="zoom-controls">
+        <button class="zoom-btn" onclick="zoomIn()">+</button>
+        <button class="zoom-btn" onclick="zoomOut()">−</button>
+        <button class="zoom-btn" onclick="resetZoom()">⟲</button>
+    </div>
+
+    <div class="info-panel" id="infoPanel">
+        <button class="close-btn" onclick="closeInfoPanel()">×</button>
+        <div class="info-content" id="infoContent"></div>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="graph-data.js"></script>
+    <script src="graph-visualization.js"></script>
+</body>
+</html>

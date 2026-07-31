@@ -1,5 +1,9 @@
 # 🏆 Dosie Hackathon - Investor Network Visualization
 
+> **DEPRECATED.** This repository is archived and no longer maintained.
+> It is kept read-only for reference; its GDS anchor records
+> `lifecycle: archived` under `portfolio:archived-projects`.
+
 Интерактивная платформа для анализа и визуализации инвестиционных связей жюри хакатона. Проект создан для демонстрации венчурных сетей, профессиональных достижений и стратегических возможностей участников.
 
 ## 🎯 Описание проекта

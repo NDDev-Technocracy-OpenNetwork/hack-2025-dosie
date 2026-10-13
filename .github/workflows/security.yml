@@ -15,7 +15,7 @@ jobs:
     name: secret-scan
     permissions:
       contents: read
-    uses: NDDev-Technocracy-OpenNetwork/ci-workflows/.github/workflows/secret-scan.yml@93eeb2a65e98a29e9dbff7909f67c6419abff046
+    uses: NDDev-Technocracy-Archive/ci-workflows-20261014/.github/workflows/secret-scan.yml@93eeb2a65e98a29e9dbff7909f67c6419abff046
     with:
       runner: ubuntu-latest
 
@@ -23,7 +23,7 @@ jobs:
     name: actionlint
     permissions:
       contents: read
-    uses: NDDev-Technocracy-OpenNetwork/ci-workflows/.github/workflows/actionlint.yml@93eeb2a65e98a29e9dbff7909f67c6419abff046
+    uses: NDDev-Technocracy-Archive/ci-workflows-20261014/.github/workflows/actionlint.yml@93eeb2a65e98a29e9dbff7909f67c6419abff046
     with:
       runner: ubuntu-latest
 
@@ -32,6 +32,6 @@ jobs:
     permissions:
       actions: read
       contents: read
-    uses: NDDev-Technocracy-OpenNetwork/ci-workflows/.github/workflows/zizmor-no-sarif.yml@93eeb2a65e98a29e9dbff7909f67c6419abff046
+    uses: NDDev-Technocracy-Archive/ci-workflows-20261014/.github/workflows/zizmor-no-sarif.yml@93eeb2a65e98a29e9dbff7909f67c6419abff046
     with:
       runner: ubuntu-latest

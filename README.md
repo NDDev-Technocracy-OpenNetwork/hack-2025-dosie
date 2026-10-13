@@ -1,8 +1,17 @@
-# 🏆 Dosie Hackathon - Investor Network Visualization
+<!-- nddev-public-hackathon -->
+# hack-2025-dosie
 
-> **DEPRECATED.** This repository is archived and no longer maintained.
-> It is kept read-only for reference; its GDS anchor records
-> `lifecycle: archived` under `portfolio:archived-projects`.
+Dosie 2025 hackathon demo: investor-network visualization and jury profiles with interactive D3.js graphs.
+
+[NDDev OpenNetwork](https://github.com/NDDev-Technocracy-OpenNetwork) · [Repository](https://github.com/NDDev-Technocracy-OpenNetwork/hack-2025-dosie)
+
+This repository is a hackathon prototype or supporting tool. Follow the project-specific setup below; cloud integrations require your own configuration and credentials.
+
+---
+
+## 🏆 Dosie Hackathon - Investor Network Visualization
+
+
 
 Интерактивная платформа для анализа и визуализации инвестиционных связей жюри хакатона. Проект создан для демонстрации венчурных сетей, профессиональных достижений и стратегических возможностей участников.
 
@@ -200,3 +209,6 @@ Priority = 0.45×investor_fit + 0.35×connection_warmth + 0.10×recency + 0.10×
 **Статус проекта**: ✅ Активная разработка  
 **Последнее обновление**: Январь 2025  
 **Версия**: 1.0.0
+## Publication data note
+
+The 2025 research snapshots and graph are historical hackathon material, including machine-assisted biographical summaries. They are not verified current biographies, investment advice or a basis for evaluating individuals. Source references, where recorded, are retained. Run the static demo with `python3 -m http.server 8080 --directory webinfo` and open `http://localhost:8080`. No backend or private API credentials are needed.
